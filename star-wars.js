@@ -56,21 +56,59 @@ function starWars() {
 						response.data.results[0][answers.category.toLowerCase()];
 					switch (answers.category.toLowerCase()) {
 						case "characters":
-							axios
-								.get(categoryInfo.map((link) => `${link}`))
-								.then((response) => characters(response.data.results[0].name));
+							const characterNames = [];
+							categoryInfo.forEach((link) => {
+								axios.get(link).then((response) => {
+									characterNames.push(response.data.name);
+									if (characterNames.length === categoryInfo.length) {
+										characters(characterNames);
+									}
+								});
+							});
 							break;
 						case "planets":
-							planets(categoryInfo);
+							const planetNames = [];
+							categoryInfo.forEach((link) => {
+								axios.get(link).then((response) => {
+									planetNames.push(response.data.name);
+									if (planetNames.length === categoryInfo.length) {
+										planets(planetNames);
+									}
+								});
+							});
 							break;
 						case "starships":
-							starships(categoryInfo);
+							const starshipNames = [];
+							categoryInfo.forEach((link) => {
+								axios.get(link).then((response) => {
+									starshipNames.push(response.data.name);
+									if (starshipNames.length === categoryInfo.length) {
+										starships(starshipNames);
+									}
+								});
+							});
 							break;
 						case "species":
-							species(categoryInfo);
+							const speciesNames = [];
+							categoryInfo.forEach((link) => {
+								axios.get(link).then((response) => {
+									speciesNames.push(response.data.name);
+									if (speciesNames.length === categoryInfo.length) {
+										species(speciesNames);
+									}
+								});
+							});
 							break;
 						case "vehicles":
-							vehicles(categoryInfo);
+							const vehicleNames = [];
+							categoryInfo.forEach((link) => {
+								axios.get(link).then((response) => {
+									vehicleNames.push(response.data.name);
+									if (vehicleNames.length === categoryInfo.length) {
+										vehicles(vehicleNames);
+									}
+								});
+							});
 							break;
 					}
 				});
@@ -78,24 +116,25 @@ function starWars() {
 	}
 
 	function characters(characterList) {
-		console.log(characterList);
 		const characterQuestion = [
 			{
 				type: "list",
 				name: "character",
 				message: "Which character are you interested in?",
-				choices: [], // setup characterQuestion THEN continue
+				choices: characterList,
 			},
 		];
-		axios
-			.get(characterList.forEach((link) => `${link}`))
-			.then((response) =>
-				characterQuestion.choices.push(response.data.results[0].name)
-			)
-			.then(
-				inquirer.prompt(characterQuestion).then((answers) => {
+		let homeworldName;
+		inquirer.prompt(characterQuestion).then((answers) => {
+			axios
+				.get(`https://swapi.dev/api/people?search=${answers.character}`)
+				.then((response) => {
 					axios
-						.get(`https://swapi.dev/api/people?search=${answers.character}`)
+						.get(`${response.data.results[0].homeworld}`)
+						.then((homeworld) => {
+							homeworldName = homeworld.data.name;
+							return response;
+						})
 						.then((response) => {
 							characterInfo = {
 								name: response.data.results[0].name,
@@ -106,17 +145,54 @@ function starWars() {
 								eyeColor: response.data.results[0].eye_color,
 								birthYear: response.data.results[0].birth_year,
 								gender: response.data.results[0].gender,
-								homeworld: response.data.results[0].homeworld,
+								homeworld: homeworldName,
 							};
 							console.log(
 								`Name: ${characterInfo.name}\nHeight: ${characterInfo.height}cm\nMass: ${characterInfo.mass}kg\nHair color: ${characterInfo.hairColor}\nSkin color: ${characterInfo.skinColor}\nEye color: ${characterInfo.eyeColor}\nBirth year: ${characterInfo.birthYear}\nGender: ${characterInfo.gender}\nHomeworld: ${characterInfo.homeworld}`
 							);
 						});
-				})
-			);
+				});
+		});
 	}
 
-	function planets(filmChoice) {}
+	function planets(planetList) {
+		const planetQuestion = [
+			{
+				type: "list",
+				name: "character",
+				message: "Which character are you interested in?",
+				choices: planetList,
+			},
+		];
+		inquirer.prompt(planetQuestion).then((answers) => {
+			axios
+				.get(`https://swapi.dev/api/people?search=${answers.character}`)
+				// .then((response) => {
+				// axios
+				// 	.get(`${response.data.results[0].homeworld}`)
+				// 	.then((homeworld) => {
+				// 		homeworldName = homeworld.data.name;
+				// 		return response;
+				// 	})
+				.then((response) => {
+					characterInfo = {
+						name: response.data.results[0].name,
+						height: response.data.results[0].height,
+						mass: response.data.results[0].mass,
+						hairColor: response.data.results[0].hair_color,
+						skinColor: response.data.results[0].skin_color,
+						eyeColor: response.data.results[0].eye_color,
+						birthYear: response.data.results[0].birth_year,
+						gender: response.data.results[0].gender,
+						homeworld: homeworldName,
+					};
+					console.log(
+						`Name: ${characterInfo.name}\nHeight: ${characterInfo.height}cm\nMass: ${characterInfo.mass}kg\nHair color: ${characterInfo.hairColor}\nSkin color: ${characterInfo.skinColor}\nEye color: ${characterInfo.eyeColor}\nBirth year: ${characterInfo.birthYear}\nGender: ${characterInfo.gender}\nHomeworld: ${characterInfo.homeworld}`
+					);
+				});
+			// });
+		});
+	}
 
 	function starships(filmChoice) {}
 
